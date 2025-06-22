@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <title>LegacyGPT – AI Willkeeper</title>
+  <style>
+    body {
+      background: linear-gradient(to bottom, #e0f2fe, #bae6fd);
+      position: relative;
+      overflow-x: hidden;
+      font-family: 'Segoe UI', Tahoma, sans-serif;
+      margin: 0;
+      padding: 0;
+      color: #111827;
+    }
+    .cloud {
+      position: fixed;
+      background: #fff;
+      border-radius: 50%;
+      box-shadow:
+        60px 15px 0 0 #fff,
+        30px 30px 0 0 #fff,
+        90px 30px 0 0 #fff;
+      width: 100px;
+      height: 60px;
+      opacity: 0.3;
+      filter: blur(1px);
+      animation: floatClouds 30s linear infinite;
+      z-index: 0;
+    }
+    .cloud:nth-child(1) {
+      top: 10%;
+      left: -120px;
+      animation-delay: 0s;
+    }
+    .cloud:nth-child(2) {
+      top: 40%;
+      left: -200px;
+      width: 150px;
+      height: 80px;
+      animation-delay: 15s;
+      opacity: 0.2;
+    }
+
+    @keyframes floatClouds {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(120vw); }
+    }
+
+    .container {
+      max-width: 500px;
+      width: 90%;
+      margin: 80px auto;
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      position: relative;
+      z-index: 10;
+      box-sizing: border-box;
+    }
+    h2 {
+      margin-top: 0;
+      font-size: calc(20px + 0.5vw);
+    }
+    label {
+      display: block;
+      margin-top: 15px;
+      font-weight: bold;
+      font-size: calc(14px + 0.3vw);
+    }
+    input, textarea, select {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-family: inherit;
+      font-size: calc(14px + 0.3vw);
+      box-sizing: border-box;
+    }
+    input[readonly] {
+      background: #f0f0f0;
+      cursor: not-allowed;
+    }
+    button {
+      width: 100%;
+      margin-top: 20px;
+      padding: 14px;
+      font-size: calc(16px + 0.4vw);
+      font-weight: bold;
+      background: linear-gradient(to right, #3b82f6, #2563eb);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    button:hover {
+      background: linear-gradient(to right, #2563eb, #1d4ed8);
+    }
+    .hidden {
+      display: none;
+    }
+    .link {
+      color: #2563eb;
+      text-decoration: underline;
+      cursor: pointer;
+      margin-top: 10px;
+      display: block;
+    }
+    .spinner {
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #2563eb;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: 20px auto;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .note {
+      font-size: 13px;
+      color: #555;
+      margin-top: 10px;
+    }
+
+    /* Mobil ve Tablet Uyumlu Tasarım */
+    @media (max-width: 768px) {
+      .container {
+        margin: 40px 10px;
+        padding: 20px;
+      }
+      h2 {
+        font-size: 1.6em;
+      }
+      label {
+        font-size: 1.1em;
+      }
+      input, textarea, select, button {
+        font-size: 1em;
+      }
+      button {
+        padding: 16px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .container {
+        margin: 30px 5px;
+        padding: 15px;
+      }
+      h2 {
+        font-size: 1.4em;
+      }
+      label {
+        font-size: 1em;
+      }
+      input, textarea, select, button {
+        font-size: 0.95em;
+      }
+      button {
+        padding: 14px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="cloud"></div>
+  <div class="cloud"></div>
+
+  <div class="container" id="registerSection">
+    <h2>Kullanıcı Kaydı</h2>
+    <form id="registerForm">
+      <label>E-posta:</label>
+      <input type="email" id="regEmail" required />
+      <label>Şifre:</label>
+      <input type="password" id="regPassword" required />
+      <button type="submit">Kaydol</button>
+      <button type="button" onclick="showLogin()" style="margin-top:10px;background:#10b981;">🔓 Giriş Yap</button>
+      <button type="button" onclick="showHeirLogin()" style="margin-top:10px;background:#6b7280;">🔒 Kilitli Mirasçı Girişi</button>
+    </form>
+  </div>
+
+  <div class="container hidden" id="loginSection">
+    <h2>Giriş Yap</h2>
+    <form id="loginForm">
+      <label>E-posta:</label>
+      <input type="email" id="loginEmail" required />
+      <label>Şifre:</label>
+      <input type="password" id="loginPassword" required />
+      <button type="submit">Giriş Yap</button>
+    </form>
+  </div>
+
+  <div class="container hidden" id="beneficiarySection">
+    <h2>Mirasçı Bilgileri</h2>
+    <form id="beneficiaryForm">
+      <label>Bu mesajı kime bırakıyorsunuz?</label>
+      <select id="beneficiary" required>
+        <option value="">Seçiniz</option>
+        <option value="Kızı">Kızı</option>
+        <option value="Sevgili">Sevgili</option>
+        <option value="Nişanlı">Nişanlı</option>
+        <option value="Sözlü">Sözlü</option>
+        <option value="Oğlu">Oğlu</option>
+        <option value="Eşi">Eşi</option>
+        <option value="Annesi">Annesi</option>
+        <option value="Babası">Babası</option>
+        <option value="Torunu">Torunu</option>
+      </select>
+      <label>Mirasçı Kullanıcı Adı:</label>
+      <div style="display: flex; align-items: center;">
+        <input type="text" id="heirUsername" required style="flex-grow:1;" />
+        <img src="public/logo.png" alt="LegacyGPT Logo" style="height:20px; margin-left:8px; border-radius:4px; vertical-align:middle;" />
+      </div>
+      <label>Mirasçı Şifre:</label>
+      <input type="password" id="heirPassword" required />
+      <label>Saklama Şifresi (otomatik oluşturulur):</label>
+      <input type="text" id="heirSecret" readonly />
+      <label>Açılma Yılı:</label>
+      <input type="number" id="unlockYear" min="2025" required />
+      <p class="note">Saklama şifresi sistem tarafından otomatik oluşturulur ve değiştirilemez.</p>
+      <button type="submit">Devam Et</button>
+    </form>
+  </div>
+
+  <div class="container hidden" id="messageSection">
+    <h2>Mesajınızı Yazın</h2>
+    <form id="messageForm">
+      <label>Vasiyet Mesajınız:</label>
+      <textarea id="messageContent" rows="6" required></textarea>
+      <button type="submit">Mesajı Kaydet</button>
+    </form>
+    <div id="savedMessage" class="hidden">
+      <p>Mesaj kaydedildi. Yönlendiriliyorsunuz...</p>
+      <div class="spinner"></div>
+    </div>
+  </div>
+
+  <div class="container hidden" id="heirLoginSection">
+    <h2>Kilitli Mirasçı Girişi</h2>
+    <form id="heirLoginForm">
+      <label>Kullanıcı Adı:</label>
+      <input type="text" id="loginHeirUsername" required />
+      <label>Şifre:</label>
+      <input type="password" id="loginHeirPassword" required />
+      <label>Saklama Şifresi:</label>
+      <input type="text" id="loginHeirSecret" required />
+      <button type="submit">Giriş Yap</button>
+    </form>
+    <div id="heirMessage" class="hidden">
+      <h3>Mesaj:</h3>
+      <p id="displayedMessage"></p>
+    </div>
+  </div>
+
+<script>
+  let userEmail = "";
+
+  function showLogin() {
+    document.getElementById("registerSection").classList.add("hidden");
+    document.getElementById("loginSection").classList.remove("hidden");
+  }
+
+  function showHeirLogin() {
+    document.getElementById("registerSection").classList.add("hidden");
+    document.getElementById("heirLoginSection").classList.remove("hidden");
+  }
+
+  function generateRandomSecret(length = 12) {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    return Array.from({ length }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+  }
+
+  function updateHeirSecret() {
+    const secretInput = document.getElementById('heirSecret');
+    if (secretInput && !secretInput.value) {
+      secretInput.value = generateRandomSecret();
+    }
+  }
+
+  document.getElementById("registerForm").addEventListener("submit", function(e) {
+    e.preventDefault();
+    const email = document.getElementById("regEmail").value;
+    const password = document.getElementById("regPassword").value;
+    userEmail = email;
+    localStorage.setItem(email + "_password", password);
+    document.getElementById("registerSection").classList.add("hidden");
+    document.getElementById("beneficiarySection").classList.remove("hidden");
+    updateHeirSecret();
+  });
+
+  document.getElementById("loginForm")?.addEventListener("submit", function(e) {
+    e.preventDefault();
+    const email = document.getElementById("loginEmail").value;
+    const password = document.getElementById("loginPassword").value;
+    if (localStorage.getItem(email + "_password") === password) {
+      userEmail = email;
+      document.getElementById("loginSection").classList.add("hidden");
+      document.getElementById("beneficiarySection").classList.remove("hidden");
+      updateHeirSecret();
+    } else {
+      alert("Geçersiz giriş bilgileri.");
+    }
+  });
+
+  document.getElementById("beneficiaryForm")?.addEventListener("submit", function(e) {
+    e.preventDefault();
+    const heirUser = document.getElementById("heirUsername").value;
+    const heirPass = document.getElementById("heirPassword").value;
+    const heirSecret = document.getElementById("heirSecret").value;
+    const year = document.getElementById("unlockYear").value;
+    const beneficiary = document.getElementById("beneficiary").value;
+
+    localStorage.setItem(userEmail + "_heirUsername", heirUser);
+    localStorage.setItem(userEmail + "_heirPassword", heirPass);
+    localStorage.setItem(userEmail + "_heirSecret", heirSecret);
+    localStorage.setItem(userEmail + "_unlockYear", year);
+    localStorage.setItem(userEmail + "_beneficiary", beneficiary);
+
+    document.getElementById("beneficiarySection").classList.add("hidden");
+    document.getElementById("messageSection").classList.remove("hidden");
+  });
+
+  document.getElementById("messageForm")?.addEventListener("submit", function(e) {
+    e.preventDefault();
+    const message = document.getElementById("messageContent").value;
+    localStorage.setItem(userEmail + "_message", message);
+    document.getElementById("messageForm").classList.add("hidden");
+    document.getElementById("savedMessage").classList.remove("hidden");
+    setTimeout(() => {
+      window.location.href = "tesekkur.html";
+    }, 3000);
+  });
+
+  document.getElementById("heirLoginForm")?.addEventListener("submit", function(e) {
+    e.preventDefault();
+    const heirUsername = document.getElementById("loginHeirUsername").value.toLowerCase();
+    const heirPassword = document.getElementById("loginHeirPassword").value;
+    const heirSecret = document.getElementById("loginHeirSecret").value;
+    const yearNow = new Date().getFullYear();
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key.endsWith("_heirUsername") && localStorage.getItem(key).toLowerCase() === heirUsername) {
+        const prefix = key.replace("_heirUsername", "");
+        if (
+          localStorage.getItem(prefix + "_heirPassword") === heirPassword &&
+          localStorage.getItem(prefix + "_heirSecret") === heirSecret &&
+          parseInt(localStorage.getItem(prefix + "_unlockYear")) <= yearNow
+        ) {
+          document.getElementById("heirMessage").classList.remove("hidden");
+          document.getElementById("displayedMessage").textContent = localStorage.getItem(prefix + "_message") || "Mesaj bulunamadı.";
+          return;
+        }
+      }
+    }
+    alert("Giriş başarısız veya açılma yılı gelmedi.");
+  });
+</script>
+</body>
+</html>
