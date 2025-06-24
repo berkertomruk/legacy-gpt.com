@@ -215,8 +215,8 @@
       <label>Şifre:</label>
       <input type="password" id="regPassword" required />
       <button type="submit">Kaydol</button>
-      <button type="button" onclick="showLogin()" style="margin-top:10px;background:#10b981;">🔓 Giriş Yap</button>
-      <button type="button" onclick="showHeirLogin()" style="margin-top:10px;background:#6b7280;">🔒 Kilitli Mirasçı Girişi</button>
+      <button type="button" onclick="goTo('loginSection', '#login')" style="margin-top:10px;background:#10b981;">🔓 Giriş Yap</button>
+      <button type="button" onclick="goTo('heirLoginSection', '#heir')" style="margin-top:10px;background:#6b7280;">🔒 Kilitli Mirasçı Girişi</button>
     </form>
   </div>
 
@@ -294,8 +294,7 @@
   </div>
 
 <script>
-  let userEmail = "";
-
+    let userEmail = "";
   function showLogin() {
     document.getElementById("registerSection").classList.add("hidden");
     document.getElementById("loginSection").classList.remove("hidden");
@@ -324,8 +323,7 @@
     const password = document.getElementById("regPassword").value;
     userEmail = email;
     localStorage.setItem(email + "_password", password);
-    document.getElementById("registerSection").classList.add("hidden");
-    document.getElementById("beneficiarySection").classList.remove("hidden");
+    goTo("beneficiarySection", "#beneficiary");
     updateHeirSecret();
   });
 
@@ -335,8 +333,7 @@
     const password = document.getElementById("loginPassword").value;
     if (localStorage.getItem(email + "_password") === password) {
       userEmail = email;
-      document.getElementById("loginSection").classList.add("hidden");
-      document.getElementById("beneficiarySection").classList.remove("hidden");
+      goTo("beneficiarySection", "#beneficiary");
       updateHeirSecret();
     } else {
       alert("Geçersiz giriş bilgileri.");
@@ -357,8 +354,7 @@
     localStorage.setItem(userEmail + "_unlockYear", year);
     localStorage.setItem(userEmail + "_beneficiary", beneficiary);
 
-    document.getElementById("beneficiarySection").classList.add("hidden");
-    document.getElementById("messageSection").classList.remove("hidden");
+    goTo("messageSection", "#message");
   });
 
   document.getElementById("messageForm")?.addEventListener("submit", function(e) {
@@ -368,8 +364,8 @@
     document.getElementById("messageForm").classList.add("hidden");
     document.getElementById("savedMessage").classList.remove("hidden");
     setTimeout(() => {
-      window.location.href = "tesekkur.html";
-    }, 3000);
+  goTo("registerSection", "#register");
+}, 3000);
   });
 
   document.getElementById("heirLoginForm")?.addEventListener("submit", function(e) {
@@ -394,7 +390,115 @@
       }
     }
     alert("Giriş başarısız veya açılma yılı gelmedi.");
+    // Sayfa bölümlerinin kontrolü için fonksiyon
+function showSection(sectionId) {
+  const sections = [
+    "registerSection",
+    "loginSection",
+    "beneficiarySection",
+    "messageSection",
+    "heirLoginSection"
+  ];
+  sections.forEach(id => {
+    document.getElementById(id)?.classList.add("hidden");
   });
+  document.getElementById(sectionId)?.classList.remove("hidden");
+}
+
+// Geri-ileri navigasyon için hash'e göre kontrol
+window.addEventListener("popstate", () => {
+  const hash = window.location.hash || "#register";
+  navigateToHash(hash);
+});
+
+function navigateToHash(hash) {
+  switch (hash) {
+    case "#login":
+      showSection("loginSection");
+      break;
+    case "#register":
+      showSection("registerSection");
+      break;
+    case "#beneficiary":
+      showSection("beneficiarySection");
+      break;
+    case "#message":
+      showSection("messageSection");
+      break;
+    case "#heir":
+      showSection("heirLoginSection");
+      break;
+    default:
+      showSection("registerSection");
+  }
+}
+
+// Navigasyon sırasında hash güncellemesi
+function goTo(sectionId, hash) {
+  history.pushState(null, "", hash);
+  showSection(sectionId);
+}
+
+  });
+</script>
+
+<script>
+// Sayfa bölümlerini göster/gizle
+function showSection(sectionId) {
+  const sections = [
+    "registerSection",
+    "loginSection",
+    "beneficiarySection",
+    "messageSection",
+    "heirLoginSection"
+  ];
+  sections.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.add("hidden");
+  });
+  const activeSection = document.getElementById(sectionId);
+  if (activeSection) activeSection.classList.remove("hidden");
+}
+
+// Hash değişimini dinle (ileri/geri için)
+window.addEventListener("popstate", () => {
+  handleHashChange();
+});
+
+function handleHashChange() {
+  const hash = window.location.hash || "#register";
+  switch (hash) {
+    case "#login":
+      showSection("loginSection");
+      break;
+    case "#register":
+      showSection("registerSection");
+      break;
+    case "#beneficiary":
+      showSection("beneficiarySection");
+      break;
+    case "#message":
+      showSection("messageSection");
+      break;
+    case "#heir":
+      showSection("heirLoginSection");
+      break;
+    default:
+      showSection("registerSection");
+  }
+}
+
+// Butonlardan yönlendirme için
+function goTo(sectionId, hash) {
+  history.pushState(null, "", hash);
+  showSection(sectionId);
+}
+
+// İlk yükleme anında hash'e göre ayar
+window.addEventListener("DOMContentLoaded", () => {
+  handleHashChange();
+});
 </script>
 </body>
 </html>
+
