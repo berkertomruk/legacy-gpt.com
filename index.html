@@ -48,40 +48,7 @@
       padding: 0;
       color: #111827;
     }
-    .cloud {
-      position: fixed;
-      background: #fff;
-      border-radius: 50%;
-      box-shadow:
-        60px 15px 0 0 #fff,
-        30px 30px 0 0 #fff,
-        90px 30px 0 0 #fff;
-      width: 100px;
-      height: 60px;
-      opacity: 0.3;
-      filter: blur(1px);
-      animation: floatClouds 30s linear infinite;
-      z-index: 0;
-    }
-    .cloud:nth-child(1) {
-      top: 10%;
-      left: -120px;
-      animation-delay: 0s;
-    }
-    .cloud:nth-child(2) {
-      top: 40%;
-      left: -200px;
-      width: 150px;
-      height: 80px;
-      animation-delay: 15s;
-      opacity: 0.2;
-    }
-
-    @keyframes floatClouds {
-      0% { transform: translateX(0); }
-      100% { transform: translateX(120vw); }
-    }
-
+  
     .container {
       max-width: 500px;
       width: 90%;
@@ -201,9 +168,54 @@
         padding: 14px;
       }
     }
+.ai-drone {
+  position: fixed;
+  width: 100px;
+  height: auto;
+  opacity: 0.8;
+  animation: flyDrone 30s linear infinite;
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* Her drone'a farklı yükseklik veriyoruz ama delay yok! */
+.drone1 {
+  top: 7%;       /* ekranın üst kısmı */
+  left: -100px;  /* hafif dışarıdan başlasın */
+  animation-delay: 0s;
+}
+.drone2 {
+  top: 26%;      
+  left: -350px;  /* biraz daha geç girsin */
+  animation-delay: 0s;
+}
+.drone3 {
+  top: 58%;      
+  left: -200px;
+  animation-delay: 0s;
+}
+.drone4 {
+  top: 83%;      /* neredeyse en alt */
+  left: -450px;  /* en geç giren */
+  animation-delay: 0s;
+}
+
+@keyframes flyDrone {
+  0% {
+    transform: translateX(-150px);
+  }
+  100% {
+    transform: translateX(120vw);
+  }
+}
+
   </style>
 </head>
 <body>
+<img class="ai-drone drone1" src="ai_drone.png" alt="AI Drone">
+<img class="ai-drone drone2" src="ai_drone.png" alt="AI Drone">
+<img class="ai-drone drone3" src="ai_drone.png" alt="AI Drone">
+<img class="ai-drone drone4" src="ai_drone.png" alt="AI Drone">
   <div class="cloud"></div>
   <div class="cloud"></div>
 
@@ -250,7 +262,6 @@
       <label>Mirasçı Kullanıcı Adı:</label>
       <div style="display: flex; align-items: center;">
         <input type="text" id="heirUsername" required style="flex-grow:1;" />
-        <img src="public/logo.png" alt="LegacyGPT Logo" style="height:20px; margin-left:8px; border-radius:4px; vertical-align:middle;" />
       </div>
       <label>Mirasçı Şifre:</label>
       <input type="password" id="heirPassword" required />
@@ -501,4 +512,3 @@ window.addEventListener("DOMContentLoaded", () => {
 </script>
 </body>
 </html>
-
