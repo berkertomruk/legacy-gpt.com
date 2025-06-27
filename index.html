@@ -267,8 +267,13 @@
       <input type="password" id="heirPassword" required />
       <label>Saklama Şifresi (otomatik oluşturulur):</label>
       <input type="text" id="heirSecret" readonly />
-      <label>Açılma Yılı:</label>
-      <input type="number" id="unlockYear" min="2025" required />
+     <label>Açılma Tarihi:</label>
+<div style="display: flex; gap: 10px;">
+  <input type="number" id="unlockDay" min="1" max="31" placeholder="Gün" required style="flex: 1;">
+  <input type="number" id="unlockMonth" min="1" max="12" placeholder="Ay" required style="flex: 1;">
+  <input type="number" id="unlockYear" min="2025" placeholder="Yıl" required style="flex: 2;">
+</div>
+<p class="note">Lütfen açılma tarihini tam olarak girin (örn. 01 / 08 / 2026).</p>
       <p class="note">Saklama şifresi sistem tarafından otomatik oluşturulur ve değiştirilemez.</p>
       <button type="submit">Devam Et</button>
     </form>
@@ -305,155 +310,147 @@
   </div>
 
 <script>
-    let userEmail = "";
-  function showLogin() {
-    document.getElementById("registerSection").classList.add("hidden");
-    document.getElementById("loginSection").classList.remove("hidden");
-  }
+let userEmail = "";
 
-  function showHeirLogin() {
-    document.getElementById("registerSection").classList.add("hidden");
-    document.getElementById("heirLoginSection").classList.remove("hidden");
-  }
-
-  function generateRandomSecret(length = 12) {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    return Array.from({ length }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
-  }
-
-  function updateHeirSecret() {
-    const secretInput = document.getElementById('heirSecret');
-    if (secretInput && !secretInput.value) {
-      secretInput.value = generateRandomSecret();
-    }
-  }
-
-  document.getElementById("registerForm").addEventListener("submit", function(e) {
-    e.preventDefault();
-    const email = document.getElementById("regEmail").value;
-    const password = document.getElementById("regPassword").value;
-    userEmail = email;
-    localStorage.setItem(email + "_password", password);
-    goTo("beneficiarySection", "#beneficiary");
-    updateHeirSecret();
-  });
-
-  document.getElementById("loginForm")?.addEventListener("submit", function(e) {
-    e.preventDefault();
-    const email = document.getElementById("loginEmail").value;
-    const password = document.getElementById("loginPassword").value;
-    if (localStorage.getItem(email + "_password") === password) {
-      userEmail = email;
-      goTo("beneficiarySection", "#beneficiary");
-      updateHeirSecret();
-    } else {
-      alert("Geçersiz giriş bilgileri.");
-    }
-  });
-
-  document.getElementById("beneficiaryForm")?.addEventListener("submit", function(e) {
-    e.preventDefault();
-    const heirUser = document.getElementById("heirUsername").value;
-    const heirPass = document.getElementById("heirPassword").value;
-    const heirSecret = document.getElementById("heirSecret").value;
-    const year = document.getElementById("unlockYear").value;
-    const beneficiary = document.getElementById("beneficiary").value;
-
-    localStorage.setItem(userEmail + "_heirUsername", heirUser);
-    localStorage.setItem(userEmail + "_heirPassword", heirPass);
-    localStorage.setItem(userEmail + "_heirSecret", heirSecret);
-    localStorage.setItem(userEmail + "_unlockYear", year);
-    localStorage.setItem(userEmail + "_beneficiary", beneficiary);
-
-    goTo("messageSection", "#message");
-  });
-
-  document.getElementById("messageForm")?.addEventListener("submit", function(e) {
-    e.preventDefault();
-    const message = document.getElementById("messageContent").value;
-    localStorage.setItem(userEmail + "_message", message);
-    document.getElementById("messageForm").classList.add("hidden");
-    document.getElementById("savedMessage").classList.remove("hidden");
-    setTimeout(() => {
-  goTo("registerSection", "#register");
-}, 3000);
-  });
-
-  document.getElementById("heirLoginForm")?.addEventListener("submit", function(e) {
-    e.preventDefault();
-    const heirUsername = document.getElementById("loginHeirUsername").value.toLowerCase();
-    const heirPassword = document.getElementById("loginHeirPassword").value;
-    const heirSecret = document.getElementById("loginHeirSecret").value;
-    const yearNow = new Date().getFullYear();
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (key.endsWith("_heirUsername") && localStorage.getItem(key).toLowerCase() === heirUsername) {
-        const prefix = key.replace("_heirUsername", "");
-        if (
-          localStorage.getItem(prefix + "_heirPassword") === heirPassword &&
-          localStorage.getItem(prefix + "_heirSecret") === heirSecret &&
-          parseInt(localStorage.getItem(prefix + "_unlockYear")) <= yearNow
-        ) {
-          document.getElementById("heirMessage").classList.remove("hidden");
-          document.getElementById("displayedMessage").textContent = localStorage.getItem(prefix + "_message") || "Mesaj bulunamadı.";
-          return;
-        }
-      }
-    }
-    alert("Giriş başarısız veya açılma yılı gelmedi.");
-    // Sayfa bölümlerinin kontrolü için fonksiyon
-function showSection(sectionId) {
-  const sections = [
-    "registerSection",
-    "loginSection",
-    "beneficiarySection",
-    "messageSection",
-    "heirLoginSection"
-  ];
-  sections.forEach(id => {
-    document.getElementById(id)?.classList.add("hidden");
-  });
-  document.getElementById(sectionId)?.classList.remove("hidden");
+function showHeirLogin() {
+  document.getElementById("registerSection").classList.add("hidden");
+  document.getElementById("heirLoginSection").classList.remove("hidden");
 }
 
-// Geri-ileri navigasyon için hash'e göre kontrol
-window.addEventListener("popstate", () => {
-  const hash = window.location.hash || "#register";
-  navigateToHash(hash);
+function generateRandomSecret(length = 12) {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  return Array.from({ length }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+}
+
+function updateHeirSecret() {
+  const secretInput = document.getElementById('heirSecret');
+  if (secretInput && !secretInput.value) {
+    secretInput.value = generateRandomSecret();
+  }
+}
+
+document.getElementById("registerForm").addEventListener("submit", function(e) {
+  e.preventDefault();
+  const email = document.getElementById("regEmail").value;
+  const password = document.getElementById("regPassword").value;
+  userEmail = email;
+  localStorage.setItem(email + "_password", password);
+  goTo("beneficiarySection", "#beneficiary");
+  updateHeirSecret();
 });
 
-function navigateToHash(hash) {
-  switch (hash) {
-    case "#login":
-      showSection("loginSection");
-      break;
-    case "#register":
-      showSection("registerSection");
-      break;
-    case "#beneficiary":
-      showSection("beneficiarySection");
-      break;
-    case "#message":
-      showSection("messageSection");
-      break;
-    case "#heir":
-      showSection("heirLoginSection");
-      break;
-    default:
-      showSection("registerSection");
+document.getElementById("loginForm")?.addEventListener("submit", function(e) {
+  e.preventDefault();
+  const email = document.getElementById("loginEmail").value;
+  const password = document.getElementById("loginPassword").value;
+  if (localStorage.getItem(email + "_password") === password) {
+    userEmail = email;
+    goTo("beneficiarySection", "#beneficiary");
+    updateHeirSecret();
+  } else {
+    alert("Geçersiz giriş bilgileri.");
   }
-}
+});
 
-// Navigasyon sırasında hash güncellemesi
-function goTo(sectionId, hash) {
-  history.pushState(null, "", hash);
-  showSection(sectionId);
-}
+  document.getElementById("beneficiaryForm")?.addEventListener("submit", function(e) {
+  e.preventDefault();
 
-  });
-</script>
+  const heirUser = document.getElementById("heirUsername").value.trim().toLowerCase();
+  const heirPass = document.getElementById("heirPassword").value;
+  const heirSecret = document.getElementById("heirSecret").value;
+  const day = parseInt(document.getElementById("unlockDay").value);
+  const month = parseInt(document.getElementById("unlockMonth").value);
+  const year = parseInt(document.getElementById("unlockYear").value);
+  const beneficiary = document.getElementById("beneficiary").value;
 
-<script>
+  // 🔒 Geçerli tarih kontrolü
+  if (isNaN(day) || isNaN(month) || isNaN(year) || day < 1 || day > 31 || month < 1 || month > 12) {
+    alert("Lütfen geçerli bir gün, ay ve yıl girin.");
+    return;
+  }
+
+  // 🔐 Tarihin gerçekten geçerli bir tarih olup olmadığını kontrol et
+  const testDate = new Date(year, month - 1, day);
+  if (
+    testDate.getFullYear() !== year ||
+    testDate.getMonth() + 1 !== month ||
+    testDate.getDate() !== day
+  ) {
+    alert("Geçerli bir tarih girin. Örneğin 31 Şubat geçersizdir.");
+    return;
+  }
+
+  const unlockDate = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+
+  localStorage.setItem(userEmail + "_heirUsername", heirUser);
+  localStorage.setItem(userEmail + "_heirPassword", heirPass);
+  localStorage.setItem(userEmail + "_heirSecret", heirSecret);
+  localStorage.setItem(userEmail + "_unlockDate", unlockDate);
+  localStorage.setItem(userEmail + "_beneficiary", beneficiary);
+
+  goTo("messageSection", "#message");
+});
+
+document.getElementById("messageForm")?.addEventListener("submit", function(e) {
+  e.preventDefault();
+  const message = document.getElementById("messageContent").value;
+  localStorage.setItem(userEmail + "_message", message);
+  document.getElementById("messageForm").classList.add("hidden");
+  document.getElementById("savedMessage").classList.remove("hidden");
+  setTimeout(() => {
+    goTo("registerSection", "#register");
+  }, 3000);
+});
+
+  document.getElementById("heirLoginForm")?.addEventListener("submit", function(e) {
+  e.preventDefault();
+  const heirUsername = document.getElementById("loginHeirUsername").value.trim().toLowerCase();
+  const heirPassword = document.getElementById("loginHeirPassword").value.trim();
+  const heirSecret = document.getElementById("loginHeirSecret").value.trim();
+  let loginSuccess = false;
+  const today = new Date();
+  const todayDay = today.getDate();
+  const todayMonth = today.getMonth() + 1;
+  const todayYear = today.getFullYear();
+
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key.endsWith("_heirUsername") && localStorage.getItem(key).toLowerCase() === heirUsername) {
+      const prefix = key.replace("_heirUsername", "");
+      const storedPassword = localStorage.getItem(prefix + "_heirPassword");
+      const storedSecret = localStorage.getItem(prefix + "_heirSecret");
+      const storedDateStr = localStorage.getItem(prefix + "_unlockDate");
+
+      if (!storedDateStr) continue;
+
+      const [unlockYear, unlockMonth, unlockDay] = storedDateStr.split("-").map(Number);
+
+      if (isNaN(unlockYear) || isNaN(unlockMonth) || isNaN(unlockDay)) continue;
+
+      const isDateReached =
+        todayYear > unlockYear ||
+        (todayYear === unlockYear && todayMonth > unlockMonth) ||
+        (todayYear === unlockYear && todayMonth === unlockMonth && todayDay >= unlockDay);
+
+      if (
+        storedPassword === heirPassword &&
+        storedSecret === heirSecret &&
+        isDateReached
+      ) {
+        document.getElementById("heirMessage").classList.remove("hidden");
+        document.getElementById("displayedMessage").textContent =
+          localStorage.getItem(prefix + "_message") || "Mesaj bulunamadı.";
+        loginSuccess = true;
+        break;
+      }
+    }
+  }
+
+  if (!loginSuccess) {
+    alert("Giriş başarısız veya açılma tarihi gelmedi.");
+  }
+});
+
 // Sayfa bölümlerini göster/gizle
 function showSection(sectionId) {
   const sections = [
@@ -463,19 +460,23 @@ function showSection(sectionId) {
     "messageSection",
     "heirLoginSection"
   ];
+
   sections.forEach(id => {
     const el = document.getElementById(id);
     if (el) el.classList.add("hidden");
   });
+
   const activeSection = document.getElementById(sectionId);
   if (activeSection) activeSection.classList.remove("hidden");
 }
 
-// Hash değişimini dinle (ileri/geri için)
-window.addEventListener("popstate", () => {
-  handleHashChange();
-});
+// Navigasyon hash güncelleme
+function goTo(sectionId, hash) {
+  history.pushState(null, "", hash);
+  showSection(sectionId);
+}
 
+// Sayfa hash'ine göre yönlendir
 function handleHashChange() {
   const hash = window.location.hash || "#register";
   switch (hash) {
@@ -499,14 +500,11 @@ function handleHashChange() {
   }
 }
 
-// Butonlardan yönlendirme için
-function goTo(sectionId, hash) {
-  history.pushState(null, "", hash);
-  showSection(sectionId);
-}
-
-// İlk yükleme anında hash'e göre ayar
+// İlk yükleme ve geri-ileri gezinme olayları
 window.addEventListener("DOMContentLoaded", () => {
+  handleHashChange();
+});
+window.addEventListener("popstate", () => {
   handleHashChange();
 });
 </script>
