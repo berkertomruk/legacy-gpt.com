@@ -334,7 +334,8 @@ function generateRandomSecret(length = 12) {
 
 function updateHeirSecret() {
   const secretInput = document.getElementById('heirSecret');
-  if (secretInput && !secretInput.value) {
+  if (secretInput) {
+    secretInput.value = "";  // Önce temizle
     secretInput.value = generateRandomSecret();
   }
 }
