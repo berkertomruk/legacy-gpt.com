@@ -338,7 +338,7 @@ function updateHeirSecret() {
     secretInput.value = generateRandomSecret();
   }
 }
-
+// KAYIT (Register)
 document.getElementById("registerForm").addEventListener("submit", function(e) {
   e.preventDefault();
   const email = document.getElementById("regEmail").value.trim().toLowerCase();
@@ -349,26 +349,25 @@ document.getElementById("registerForm").addEventListener("submit", function(e) {
   updateHeirSecret();
 });
 
+// GİRİŞ (Login)
 document.getElementById("loginForm")?.addEventListener("submit", function(e) {
   e.preventDefault();
   const email = document.getElementById("loginEmail").value.trim().toLowerCase();
   const password = document.getElementById("loginPassword").value.trim();
- if (localStorage.getItem(email + "_password") === password) {
-  userEmail = email;
 
-  const existingMessage = localStorage.getItem(email + "_message");
-  if (existingMessage) {
-    alert("Kayıtlı mesajınız:\n\n" + existingMessage);
+  if (localStorage.getItem(email + "_password") === password) {
+    userEmail = email;
+    goTo("beneficiarySection", "#beneficiary");
+    updateHeirSecret();
+  } else {
+    alert("E-posta adresiniz veya şifreniz yanlış!");
+    document.getElementById("loginPassword").value = ""; // Şifreyi temizle
+    document.getElementById("loginPassword").focus();
   }
-
-  goTo("beneficiarySection", "#beneficiary");
-  updateHeirSecret();
-}
 });
 
   document.getElementById("beneficiaryForm")?.addEventListener("submit", function(e) {
   e.preventDefault();
-
   const heirUser = document.getElementById("heirUsername").value.trim().toLowerCase();
   const heirPass = document.getElementById("heirPassword").value.trim();
   const heirSecret = document.getElementById("heirSecret").value.trim();
@@ -480,25 +479,30 @@ break;
 
 // Sayfa bölümlerini göster/gizle
 function showSection(sectionId) {
-  const sections = [
-    "registerSection",
-    "loginSection",
-    "beneficiarySection",
-    "messageSection",
-    "heirLoginSection"
-  ];
+  // Tüm .container'ları gizle
+  document.querySelectorAll('.container').forEach(el => el.classList.add("hidden"));
 
-  sections.forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.classList.add("hidden");
-  });
-
+  // Sadece ilgili bölümü göster
   const activeSection = document.getElementById(sectionId);
   if (activeSection) activeSection.classList.remove("hidden");
+
+  // Her açılışta ilgili formu temizle
+  if (sectionId === "loginSection") {
+    const loginForm = document.getElementById("loginForm");
+    if (loginForm) loginForm.reset();
+  }
+  if (sectionId === "registerSection") {
+    const registerForm = document.getElementById("registerForm");
+    if (registerForm) registerForm.reset();
+  }
+  if (sectionId === "heirLoginSection") {
+    const heirLoginForm = document.getElementById("heirLoginForm");
+    if (heirLoginForm) heirLoginForm.reset();
+    const heirSecret = document.getElementById("loginHeirSecret");
+    if (heirSecret) heirSecret.value = "";
+  }
 }
 
-
-// Sayfa hash'ine göre yönlendir
 function handleHashChange() {
   const hash = window.location.hash || "#register";
   switch (hash) {
@@ -536,34 +540,93 @@ function loadSavedMessages() {
   const container = document.getElementById("savedMessagesContainer");
   container.innerHTML = "";
 
-  for (let i = 0; i < localStorage.length; i++) {
-    const key = localStorage.key(i);
-    if (key.includes("_message_") && key.startsWith(userEmail)) {
-      const message = localStorage.getItem(key);
-      const card = document.createElement("div");
-      card.style.padding = "15px";
-      card.style.border = "1px solid #ccc";
-      card.style.borderRadius = "8px";
-      card.style.background = "#f0f9ff";
-      card.style.whiteSpace = "pre-wrap";
-      card.textContent = message;
-      container.appendChild(card);
-    }
+for (let i = 0; i < localStorage.length; i++) {
+  const key = localStorage.key(i);
+  if (key.includes("_message_") && key.startsWith(userEmail)) {
+    const message = localStorage.getItem(key);
+    const card = document.createElement("div");
+    card.style.padding = "15px";
+    card.style.border = "1px solid #ccc";
+    card.style.borderRadius = "8px";
+    card.style.background = "#f0f9ff";
+    card.style.whiteSpace = "pre-wrap";
+    card.style.position = "relative";
+
+    // Mesajı ayrı div'e koy
+    const messageDiv = document.createElement("div");
+    messageDiv.textContent = message;
+    card.appendChild(messageDiv);
+
+    // 🗑️ Sil Butonu
+  const deleteBtn = document.createElement("button");
+deleteBtn.textContent = "✖";
+deleteBtn.title = "Sil";
+deleteBtn.style.position = "absolute";
+deleteBtn.style.top = "6px";
+deleteBtn.style.right = "8px";
+deleteBtn.style.background = "transparent";
+deleteBtn.style.color = "#ef4444";
+deleteBtn.style.border = "none";
+deleteBtn.style.borderRadius = "50%";
+deleteBtn.style.fontSize = "17px";
+deleteBtn.style.width = "28px";
+deleteBtn.style.height = "28px";
+deleteBtn.style.cursor = "pointer";
+deleteBtn.style.lineHeight = "25px";
+deleteBtn.style.display = "flex";
+deleteBtn.style.alignItems = "center";
+deleteBtn.style.justifyContent = "center";
+deleteBtn.style.transition = "background 0.15s";
+deleteBtn.onmouseenter = () => deleteBtn.style.background = "#f3f4f6";
+deleteBtn.onmouseleave = () => deleteBtn.style.background = "transparent";
+
+    deleteBtn.onclick = function() {
+      if (confirm("Bu mesajı silmek istediğinize emin misiniz?")) {
+        localStorage.removeItem(key);
+        loadSavedMessages(); // Listeyi yenile
+      }
+    };
+
+    card.appendChild(deleteBtn);
+    container.appendChild(card);
   }
+}
 
   if (container.innerHTML === "") {
     container.innerHTML = "<p>Hiç mesaj bulunamadı.</p>";
   }
 }
 
-// goTo fonksiyonunu güncelle → mesaj sayfasına giderken load et
 function goTo(sectionId, hash) {
   history.pushState(null, "", hash);
   showSection(sectionId);
+
+  // Saved Messages bölümüne gelince mesajları yükle
   if (sectionId === "savedMessagesSection") {
     loadSavedMessages();
   }
+
+  // Her bölümde ilgili formu temizle (güvenli null kontrolüyle)
+  if (sectionId === "loginSection") {
+    const loginForm = document.getElementById("loginForm");
+    if (loginForm) loginForm.reset();
+  }
+  if (sectionId === "registerSection") {
+    const registerForm = document.getElementById("registerForm");
+    if (registerForm) registerForm.reset();
+  }
+  if (sectionId === "heirLoginSection") {
+    const heirLoginForm = document.getElementById("heirLoginForm");
+    if (heirLoginForm) heirLoginForm.reset();
+    const heirSecret = document.getElementById("loginHeirSecret");
+    if (heirSecret) heirSecret.value = "";
+  }
+
+  // Scroll'u garanti şekilde en üste çek
+  setTimeout(() => window.scrollTo(0, 0), 20);
 }
+
+
 </script>
 </body>
 </html>
