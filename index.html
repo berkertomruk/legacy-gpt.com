@@ -276,6 +276,8 @@
 <p class="note">Lütfen açılma tarihini tam olarak girin (örn. 01 / 08 / 2026).</p>
       <p class="note">Saklama şifresi sistem tarafından otomatik oluşturulur ve değiştirilemez.</p>
       <button type="submit">Devam Et</button>
+      <button type="button" onclick="goTo('savedMessagesSection', '#savedMessages')" style="margin-top:10px;background:#f59e0b;">💾 Kayıtlı Mesajları Gör</button>
+
     </form>
   </div>
 
@@ -293,21 +295,29 @@
   </div>
 
   <div class="container hidden" id="heirLoginSection">
-    <h2>Kilitli Mirasçı Girişi</h2>
-    <form id="heirLoginForm">
-      <label>Kullanıcı Adı:</label>
-      <input type="text" id="loginHeirUsername" required />
-      <label>Şifre:</label>
-      <input type="password" id="loginHeirPassword" required />
-      <label>Saklama Şifresi:</label>
-      <input type="text" id="loginHeirSecret" required />
-      <button type="submit">Giriş Yap</button>
-    </form>
-    <div id="heirMessage" class="hidden">
-      <h3>Mesaj:</h3>
-      <p id="displayedMessage"></p>
-    </div>
+  <h2>Kilitli Mirasçı Girişi</h2>
+  <form id="heirLoginForm">
+    <label>Kullanıcı Adı:</label>
+    <input type="text" id="loginHeirUsername" required />
+    <label>Şifre:</label>
+    <input type="password" id="loginHeirPassword" required />
+    <label>Saklama Şifresi:</label>
+    <input type="text" id="loginHeirSecret" required />
+    <button type="submit">Giriş Yap</button>
+  </form>
+  <div id="heirMessage" class="hidden">
+    <h3>Mesaj:</h3>
+    <p id="displayedMessage"></p>
   </div>
+</div> <!-- heirLoginSection kapanışı -->
+
+<!-- ⬇️ Yeni eklenen bölüm -->
+<div class="container hidden" id="savedMessagesSection">
+  <h2>Kayıtlı Mesajlarınız</h2>
+  <div id="savedMessagesContainer" style="display: grid; gap: 10px;"></div>
+  <button type="button" onclick="goTo('beneficiarySection', '#beneficiary')" style="margin-top:20px;">⬅️ Geri Dön</button>
+</div>
+
 
 <script>
 let userEmail = "";
@@ -343,13 +353,17 @@ document.getElementById("loginForm")?.addEventListener("submit", function(e) {
   e.preventDefault();
   const email = document.getElementById("loginEmail").value;
   const password = document.getElementById("loginPassword").value;
-  if (localStorage.getItem(email + "_password") === password) {
-    userEmail = email;
-    goTo("beneficiarySection", "#beneficiary");
-    updateHeirSecret();
-  } else {
-    alert("Geçersiz giriş bilgileri.");
+ if (localStorage.getItem(email + "_password") === password) {
+  userEmail = email;
+
+  const existingMessage = localStorage.getItem(email + "_message");
+  if (existingMessage) {
+    alert("Kayıtlı mesajınız:\n\n" + existingMessage);
   }
+
+  goTo("beneficiarySection", "#beneficiary");
+  updateHeirSecret();
+}
 });
 
   document.getElementById("beneficiaryForm")?.addEventListener("submit", function(e) {
@@ -394,7 +408,8 @@ document.getElementById("loginForm")?.addEventListener("submit", function(e) {
 document.getElementById("messageForm")?.addEventListener("submit", function(e) {
   e.preventDefault();
   const message = document.getElementById("messageContent").value;
-  localStorage.setItem(userEmail + "_message", message);
+  const uniqueKey = userEmail + "_message_" + Date.now();
+localStorage.setItem(uniqueKey, message);
   document.getElementById("messageForm").classList.add("hidden");
   document.getElementById("savedMessage").classList.remove("hidden");
   setTimeout(() => {
@@ -470,11 +485,6 @@ function showSection(sectionId) {
   if (activeSection) activeSection.classList.remove("hidden");
 }
 
-// Navigasyon hash güncelleme
-function goTo(sectionId, hash) {
-  history.pushState(null, "", hash);
-  showSection(sectionId);
-}
 
 // Sayfa hash'ine göre yönlendir
 function handleHashChange() {
@@ -507,6 +517,41 @@ window.addEventListener("DOMContentLoaded", () => {
 window.addEventListener("popstate", () => {
   handleHashChange();
 });
+// ... (mevcut kodların devamı)
+
+// Kayıtlı mesajları yükle ve kutucuk olarak göster
+function loadSavedMessages() {
+  const container = document.getElementById("savedMessagesContainer");
+  container.innerHTML = "";
+
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key.includes("_message_") && key.startsWith(userEmail)) {
+      const message = localStorage.getItem(key);
+      const card = document.createElement("div");
+      card.style.padding = "15px";
+      card.style.border = "1px solid #ccc";
+      card.style.borderRadius = "8px";
+      card.style.background = "#f0f9ff";
+      card.style.whiteSpace = "pre-wrap";
+      card.textContent = message;
+      container.appendChild(card);
+    }
+  }
+
+  if (container.innerHTML === "") {
+    container.innerHTML = "<p>Hiç mesaj bulunamadı.</p>";
+  }
+}
+
+// goTo fonksiyonunu güncelle → mesaj sayfasına giderken load et
+function goTo(sectionId, hash) {
+  history.pushState(null, "", hash);
+  showSection(sectionId);
+  if (sectionId === "savedMessagesSection") {
+    loadSavedMessages();
+  }
+}
 </script>
 </body>
 </html>
