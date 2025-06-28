@@ -341,8 +341,8 @@ function updateHeirSecret() {
 
 document.getElementById("registerForm").addEventListener("submit", function(e) {
   e.preventDefault();
-  const email = document.getElementById("regEmail").value;
-  const password = document.getElementById("regPassword").value;
+  const email = document.getElementById("regEmail").value.trim().toLowerCase();
+  const password = document.getElementById("regPassword").value.trim();
   userEmail = email;
   localStorage.setItem(email + "_password", password);
   goTo("beneficiarySection", "#beneficiary");
@@ -351,8 +351,8 @@ document.getElementById("registerForm").addEventListener("submit", function(e) {
 
 document.getElementById("loginForm")?.addEventListener("submit", function(e) {
   e.preventDefault();
-  const email = document.getElementById("loginEmail").value;
-  const password = document.getElementById("loginPassword").value;
+  const email = document.getElementById("loginEmail").value.trim().toLowerCase();
+  const password = document.getElementById("loginPassword").value.trim();
  if (localStorage.getItem(email + "_password") === password) {
   userEmail = email;
 
@@ -370,12 +370,12 @@ document.getElementById("loginForm")?.addEventListener("submit", function(e) {
   e.preventDefault();
 
   const heirUser = document.getElementById("heirUsername").value.trim().toLowerCase();
-  const heirPass = document.getElementById("heirPassword").value;
-  const heirSecret = document.getElementById("heirSecret").value;
-  const day = parseInt(document.getElementById("unlockDay").value);
-  const month = parseInt(document.getElementById("unlockMonth").value);
-  const year = parseInt(document.getElementById("unlockYear").value);
-  const beneficiary = document.getElementById("beneficiary").value;
+  const heirPass = document.getElementById("heirPassword").value.trim();
+  const heirSecret = document.getElementById("heirSecret").value.trim();
+  const day = parseInt(document.getElementById("unlockDay").value.trim());
+  const month = parseInt(document.getElementById("unlockMonth").value.trim());
+  const year = parseInt(document.getElementById("unlockYear").value.trim());
+  const beneficiary = document.getElementById("beneficiary").value.trim();
 
   // 🔒 Geçerli tarih kontrolü
   if (isNaN(day) || isNaN(month) || isNaN(year) || day < 1 || day > 31 || month < 1 || month > 12) {
@@ -407,7 +407,7 @@ document.getElementById("loginForm")?.addEventListener("submit", function(e) {
 
 document.getElementById("messageForm")?.addEventListener("submit", function(e) {
   e.preventDefault();
-  const message = document.getElementById("messageContent").value;
+  const message = document.getElementById("messageContent").value.trim();
   const uniqueKey = userEmail + "_message_" + Date.now();
 localStorage.setItem(uniqueKey, message);
   document.getElementById("messageForm").classList.add("hidden");
@@ -453,10 +453,22 @@ localStorage.setItem(uniqueKey, message);
         isDateReached
       ) {
         document.getElementById("heirMessage").classList.remove("hidden");
-        document.getElementById("displayedMessage").textContent =
-          localStorage.getItem(prefix + "_message") || "Mesaj bulunamadı.";
-        loginSuccess = true;
-        break;
+        let lastMessage = null;
+let lastKey = null;
+for (let j = 0; j < localStorage.length; j++) {
+  const msgKey = localStorage.key(j);
+  if (msgKey.startsWith(prefix + "_message_")) {
+    if (!lastKey || msgKey > lastKey) {
+      lastKey = msgKey;
+      lastMessage = localStorage.getItem(msgKey);
+    }
+  }
+}
+document.getElementById("displayedMessage").textContent =
+  lastMessage || "Mesaj bulunamadı.";
+loginSuccess = true;
+break;
+
       }
     }
   }
